@@ -1,94 +1,122 @@
+# Billed Frontend
 
-## L'architecture du projet :
-Ce projet, dit frontend, est connecté à un service API backend que vous devez aussi lancer en local.
+Frontend du projet OpenClassrooms P9 Billed.
 
-Le projet backend se trouve ici: https://github.com/OpenClassrooms-Student-Center/Billed-app-FR-back
+Cette application permet de se connecter en tant qu'employe ou administrateur RH, de consulter des notes de frais, d'en creer de nouvelles cote employe, et de les valider ou refuser cote administrateur. Le frontend consomme l'API locale exposee par le backend sur `http://localhost:5678`.
 
-## Organiser son espace de travail :
-Pour une bonne organization, vous pouvez créer un dossier bill-app dans lequel vous allez cloner le projet backend et par la suite, le projet frontend:
+## Stack
 
-Clonez le projet backend dans le dossier bill-app :
-```
-$ git clone https://github.com/OpenClassrooms-Student-Center/Billed-app-FR-Back.git
-```
+- JavaScript ES Modules
+- HTML / CSS
+- jQuery
+- Jest
+- Testing Library (`@testing-library/dom`, `user-event`)
 
-```
-bill-app/
-   - Billed-app-FR-Back
-```
+## Prerequis
 
-Clonez le projet frontend dans le dossier bill-app :
-```
-$ git clone https://github.com/OpenClassrooms-Student-Center/Billed-app-FR-Front.git
-```
+- Node.js
+- npm
+- Le backend Billed lance localement
 
-```
-bill-app/
-   - Billed-app-FR-Back
-   - Billed-app-FR-Front
-```
+Version verifiee dans ce repo : `Node.js 24.0.2` et `npm 11.3.0`.
 
-## Comment lancer l'application en local ?
+## Installation
 
-### étape 1 - Lancer le backend :
-
-Suivez les indications dans le README du projet backend.
-
-### étape 2 - Lancer le frontend :
-
-Allez au repo cloné :
-```
-$ cd Billed-app-FR-Front
+```bash
+cd Billed-app-FR-Front-main
+npm install
 ```
 
-Installez les packages npm (décrits dans `package.json`) :
-```
-$ npm install
-```
+## Lancer le projet
 
-Installez live-server pour lancer un serveur local :
-```
-$ npm install -g live-server
-```
+1. Lancez d'abord le backend dans le repo `Billed-app-FR-Back-main`.
+2. Dans ce repo frontend :
 
-Lancez l'application :
-```
-$ live-server
+```bash
+cd Billed-app-FR-Front-main
+npx live-server
 ```
 
-Puis allez à l'adresse : `http://127.0.0.1:8080/`
+Application disponible sur :
 
-
-## Comment lancer tous les tests en local avec Jest ?
-
-```
-$ npm run test
+```text
+http://127.0.0.1:8080/
 ```
 
-## Comment lancer un seul test ?
+## Parcours disponibles
 
-Installez jest-cli :
+- Employe : connexion, consultation des notes de frais, creation d'une nouvelle note, envoi d'un justificatif.
+- Administrateur RH : connexion, consultation du dashboard, visualisation d'un justificatif, validation ou refus d'une note.
 
-```
-$npm i -g jest-cli
-$jest src/__tests__/your_test_file.js
-```
+## Comptes de test
 
-## Comment voir la couverture de test ?
+Ces comptes sont verifies dans la base SQLite du backend (`database_dev.sqlite`) :
 
-`http://127.0.0.1:8080/coverage/lcov-report/`
-
-## Comptes et utilisateurs :
-
-Vous pouvez vous connecter en utilisant les comptes:
-
-### administrateur : 
-```
-utilisateur : admin@test.tld 
+```text
+Administrateur
+email : admin@test.tld
 mot de passe : admin
-```
-### employé :
-```
-utilisateur : employee@test.tld
+
+Employe
+email : employee@test.tld
 mot de passe : employee
 ```
+
+## Tests
+
+Lancer toute la suite :
+
+```bash
+npm test
+```
+
+Resultat actuel :
+
+```text
+11/11 suites
+49/49 tests
+```
+
+## Couverture
+
+Couverture actuelle obtenue avec `npm test` :
+
+```text
+Statements : 89.51%
+Branches   : 74.51%
+Functions  : 81.43%
+Lines      : 91.94%
+```
+
+Le rapport HTML est genere dans :
+
+```text
+coverage/lcov-report/index.html
+```
+
+## Commandes utiles
+
+```bash
+npm test
+npx live-server
+```
+
+## Structure du projet
+
+```text
+src/
+  app/          Router, Store, utilitaires
+  containers/   logique des pages
+  views/        templates HTML
+  css/          styles
+  constants/    routes et constantes
+  fixtures/     jeux de donnees de test
+  __mocks__/    mocks API pour les tests
+  __tests__/    tests unitaires et d'integration
+```
+
+## Notes de setup
+
+- Le frontend n'a pas de script `start` npm : le lancement se fait via `live-server`.
+- Les tests frontend utilisent des mocks (`src/__mocks__/store.js`) et peuvent etre executes sans lancer le backend.
+- En execution normale, le frontend appelle l'API locale definie dans `src/app/Store.js`, sur `http://localhost:5678`.
