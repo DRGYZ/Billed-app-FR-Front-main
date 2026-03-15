@@ -63,8 +63,6 @@ class Store {
   users = () => new ApiEntity({key: 'users', api: this.api})
   login = (data) => this.api.post({url: '/auth/login', data, headers: getHeaders({noAuthorization: true})})
 
-  ref = (path) => this.store.doc(path)
-
   bill = bid => (new ApiEntity({key: 'bills', api: this.api})).select({selector: bid})
   bills = () => new ApiEntity({key: 'bills', api: this.api})
 }
