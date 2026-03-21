@@ -186,6 +186,41 @@ describe('Given I am connected as Admin, and I am on Dashboard page, and I click
       expect(bigBilledIcon).toBeTruthy()
     })
   })
+  describe("When the update is still pending", () => {
+    test("Then it should wait before navigating away", async () => {
+      Object.defineProperty(window, "localStorage", { value: localStorageMock })
+      window.localStorage.setItem("user", JSON.stringify({
+        type: "Admin"
+      }))
+      document.body.innerHTML = DashboardFormUI(bills[0])
+
+      let resolveUpdate
+      const updatePromise = new Promise((resolve) => {
+        resolveUpdate = resolve
+      })
+
+      const store = {
+        bills: jest.fn(() => ({
+          update: jest.fn(() => updatePromise),
+        })),
+      }
+      const onNavigate = jest.fn()
+      const dashboard = new Dashboard({
+        document, onNavigate, store, bills, localStorage: window.localStorage
+      })
+
+      const acceptButton = screen.getByTestId("btn-accept-bill-d")
+      acceptButton.addEventListener("click", (e) => dashboard.handleAcceptSubmit(e, bills[0]))
+
+      fireEvent.click(acceptButton)
+      expect(onNavigate).not.toHaveBeenCalled()
+
+      resolveUpdate({})
+      await waitFor(() => {
+        expect(onNavigate).toHaveBeenCalledWith(ROUTES_PATH["Dashboard"])
+      })
+    })
+  })
   describe('When I click on refuse button', () => {
     test('I should be sent on Dashboard with big billed icon instead of form', () => {
       Object.defineProperty(window, 'localStorage', { value: localStorageMock })

@@ -141,8 +141,14 @@ export default class {
       status: "accepted",
       commentAdmin: $("#commentary2").val(),
     };
-    this.updateBill(newBill);
+    const update = this.updateBill(newBill);
+    if (update && typeof update.then === "function") {
+      return update.then(() => {
+        this.onNavigate(ROUTES_PATH["Dashboard"]);
+      });
+    }
     this.onNavigate(ROUTES_PATH["Dashboard"]);
+    return null;
   };
 
   handleRefuseSubmit = (e, bill) => {
@@ -151,8 +157,14 @@ export default class {
       status: "refused",
       commentAdmin: $("#commentary2").val(),
     };
-    this.updateBill(newBill);
+    const update = this.updateBill(newBill);
+    if (update && typeof update.then === "function") {
+      return update.then(() => {
+        this.onNavigate(ROUTES_PATH["Dashboard"]);
+      });
+    }
     this.onNavigate(ROUTES_PATH["Dashboard"]);
+    return null;
   };
 
   handleShowTickets(e, bills, index) {

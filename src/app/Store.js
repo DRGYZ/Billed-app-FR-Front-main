@@ -9,7 +9,7 @@ class Api {
     this.baseUrl = baseUrl;
   }
   async get({url, headers}) {
-    return jsonOrThrowIfError(await fetch(`${this.baseUrl}${url}`, {headers, method: 'GET'}))
+    return jsonOrThrowIfError(await fetch(`${this.baseUrl}${url}`, {headers, method: 'GET', cache: 'no-store'}))
   }
   async post({url, data, headers}) {
     return jsonOrThrowIfError(await fetch(`${this.baseUrl}${url}`, {headers, method: 'POST', body: data}))
