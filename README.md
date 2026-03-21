@@ -74,7 +74,7 @@ Resultat actuel :
 
 ```text
 11/11 suites
-49/49 tests
+54/54 tests
 ```
 
 ## Couverture
@@ -82,10 +82,10 @@ Resultat actuel :
 Couverture actuelle obtenue avec `npm test` :
 
 ```text
-Statements : 89.51%
-Branches   : 74.51%
-Functions  : 81.43%
-Lines      : 91.94%
+Statements : 89.82%
+Branches   : 74.55%
+Functions  : 83.33%
+Lines      : 92.19%
 ```
 
 Le rapport HTML est genere dans :

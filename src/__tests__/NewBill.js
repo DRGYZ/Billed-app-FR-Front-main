@@ -26,6 +26,10 @@ describe("Given I am connected as an employee", () => {
     router()
   })
 
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   describe("When I am on NewBill Page", () => {
     test("Then the form should be visible", () => {
       window.onNavigate(ROUTES_PATH.NewBill)
@@ -120,6 +124,132 @@ describe("Given I am connected as an employee", () => {
       await waitFor(() => screen.getByText("Mes notes de frais"))
       expect(handleSubmit).toHaveBeenCalled()
       expect(screen.getByText("Mes notes de frais")).toBeTruthy()
+    })
+  })
+
+  describe("When an API error occurs on NewBill", () => {
+    test("Then it should log a 404 error when file upload fails", async () => {
+      window.onNavigate(ROUTES_PATH.NewBill)
+
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
+      const store = {
+        bills: jest.fn(() => ({
+          create: jest.fn(() => Promise.reject(new Error("Erreur 404"))),
+        })),
+      }
+
+      const newBill = new NewBill({
+        document,
+        onNavigate: window.onNavigate,
+        store,
+        localStorage: window.localStorage,
+      })
+
+      const fileInput = screen.getByTestId("file")
+      const goodFile = new File(["hello"], "image.png", { type: "image/png" })
+
+      fireEvent.change(fileInput, { target: { files: [goodFile] } })
+
+      await waitFor(() => expect(errorSpy).toHaveBeenCalled())
+      expect(errorSpy).toHaveBeenCalledWith(new Error("Erreur 404"))
+    })
+
+    test("Then it should log a 500 error when file upload fails", async () => {
+      window.onNavigate(ROUTES_PATH.NewBill)
+
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
+      const store = {
+        bills: jest.fn(() => ({
+          create: jest.fn(() => Promise.reject(new Error("Erreur 500"))),
+        })),
+      }
+
+      const newBill = new NewBill({
+        document,
+        onNavigate: window.onNavigate,
+        store,
+        localStorage: window.localStorage,
+      })
+
+      const fileInput = screen.getByTestId("file")
+      const goodFile = new File(["hello"], "image.png", { type: "image/png" })
+
+      fireEvent.change(fileInput, { target: { files: [goodFile] } })
+
+      await waitFor(() => expect(errorSpy).toHaveBeenCalled())
+      expect(errorSpy).toHaveBeenCalledWith(new Error("Erreur 500"))
+    })
+
+    test("Then it should log a 404 error when bill update fails", async () => {
+      window.onNavigate(ROUTES_PATH.NewBill)
+
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
+      const store = {
+        bills: jest.fn(() => ({
+          update: jest.fn(() => Promise.reject(new Error("Erreur 404"))),
+        })),
+      }
+
+      const newBill = new NewBill({
+        document,
+        onNavigate: window.onNavigate,
+        store,
+        localStorage: window.localStorage,
+      })
+
+      newBill.billId = "1234"
+      newBill.updateBill({
+        email: "employee@test.tld",
+        type: "Transports",
+        name: "Taxi",
+        amount: 45,
+        date: "2022-01-01",
+        vat: "20",
+        pct: 20,
+        commentary: "",
+        fileUrl: "test.png",
+        fileName: "test.png",
+        status: "pending",
+      })
+
+      await waitFor(() => expect(errorSpy).toHaveBeenCalled())
+      expect(errorSpy).toHaveBeenCalledWith(new Error("Erreur 404"))
+    })
+
+    test("Then it should log a 500 error when bill update fails", async () => {
+      window.onNavigate(ROUTES_PATH.NewBill)
+
+      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
+      const store = {
+        bills: jest.fn(() => ({
+          update: jest.fn(() => Promise.reject(new Error("Erreur 500"))),
+        })),
+      }
+
+      const newBill = new NewBill({
+        document,
+        onNavigate: window.onNavigate,
+        store,
+        localStorage: window.localStorage,
+      })
+
+      newBill.billId = "1234"
+      newBill.updateBill({
+        email: "employee@test.tld",
+        type: "Transports",
+        name: "Taxi",
+        amount: 45,
+        date: "2022-01-01",
+        vat: "20",
+        pct: 20,
+        commentary: "",
+        fileUrl: "test.png",
+        fileName: "test.png",
+        status: "pending",
+      })
+
+      await waitFor(() => expect(errorSpy).toHaveBeenCalled())
+      expect(errorSpy).toHaveBeenCalledWith(new Error("Erreur 500"))
     })
   })
 })
