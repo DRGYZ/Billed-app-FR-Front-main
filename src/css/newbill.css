@@ -1,63 +1,185 @@
 .form-newbill-container {
   width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  min-height: auto;
+  margin-top: 0;
 }
 
-.col-half {
-  margin:auto;
-  width: 75%;
-  margin-top: 16px;
+.newbill-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 22px;
 }
 
-.col-half-row {
-  display:flex;
-  width: 75%;
-  margin-left: 20px;
-  margin-top: 16px;
+.newbill-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
 }
 
-.blue-border {
-  opacity: 0.5;
-  border: 2px solid #0D5AE5 !important;
-  box-sizing: border-box;
-  border-radius: 5px;
+.newbill-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
 }
 
-label {
-  font-style: normal;
-  font-weight: 500;
+.newbill-field label,
+.bold-label {
+  margin: 0;
+  font-weight: 700;
+  font-size: 12.5px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.newbill-vat-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.newbill-control {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
   font-size: 14px;
-  line-height: 16px;
+  line-height: 1.4;
+  opacity: 1 !important;
+  box-shadow: none;
 }
 
-.flex-col {
-  margin-left: 50px;
+.newbill-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  outline: none;
 }
 
-.white-text {
-  color: #fff;
+textarea.newbill-control {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.receipt-dropzone {
+  border: 1.5px dashed var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.receipt-drop-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.receipt-preview-card {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+.receipt-preview-card[hidden] {
+  display: none;
+}
+
+.receipt-preview-thumb {
+  width: 74px;
+  height: 74px;
+  object-fit: cover;
+  object-position: center 20%;
+  border-radius: 6px;
+  background: #FFFFFF;
+}
+
+.receipt-preview-title {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.receipt-preview-sub {
+  font-size: 12px;
+  color: var(--ok-fg);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.error,
+[data-testid="file-error"],
+[data-testid="save-error"] {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--bad-fg);
+}
+
+.newbill-actions {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 #btn-send-bill {
-  width: 100px;
-  background-color: #0E5AE5;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 26px;
-  letter-spacing: 0.2px;
-  margin-top: 50px;
+  width: 100%;
+  max-width: 320px;
+  min-height: 44px;
+  margin-top: 0;
+  border-radius: var(--radius-sm);
+  border: 0;
+  background-color: var(--accent);
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 14.5px;
+  cursor: pointer;
 }
 
-textarea, input, select {
-  color: #0E5AE5 !important;
-  opacity: 0.7 !important;
+#btn-send-bill:hover:not(:disabled) {
+  background-color: var(--accent-hover);
 }
 
-textarea:focus, input:focus, select:focus {
-  color: #0E5AE5 !important;
-  opacity: 1 !important;
+#btn-send-bill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-*[placeholder] {
-  color: #0E5AE5 !important;
+@media (max-width: 720px) {
+  .form-newbill-container {
+    padding: 14px;
+  }
+
+  .newbill-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .newbill-head-inline {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+
+  #btn-send-bill {
+    max-width: none;
+  }
 }

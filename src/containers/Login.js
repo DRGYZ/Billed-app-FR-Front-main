@@ -14,6 +14,19 @@ export default class Login {
       ?.addEventListener("submit", this.handleSubmitEmployee);
     document.querySelector('[data-testid="form-admin"]')
       ?.addEventListener("submit", this.handleSubmitAdmin);
+
+    document.querySelectorAll("[data-fill-role]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const role = btn.getAttribute("data-fill-role");
+        const emailInput = document.querySelector(`[data-testid="${role}-email-input"]`);
+        const passwordInput = document.querySelector(`[data-testid="${role}-password-input"]`);
+        if (emailInput && passwordInput) {
+          emailInput.value = role === "employee" ? "employee@test.tld" : "admin@test.tld";
+          passwordInput.value = role;
+          emailInput.focus();
+        }
+      });
+    });
   }
 
   handleSubmitEmployee = (event) => this.submit(event, "employee", "Employee", "Bills");
@@ -30,7 +43,9 @@ export default class Login {
     const error = form.querySelector("[role=alert]");
 
     this.pending = true;
-    this.buttons.forEach(button => { button.disabled = true; });
+    this.buttons.forEach((button) => {
+      button.disabled = true;
+    });
     error.hidden = true;
 
     try {
@@ -39,16 +54,19 @@ export default class Login {
       this.localStorage.setItem("jwt", jwt);
       this.localStorage.setItem("user", JSON.stringify({ type, email, status: "connected" }));
     } catch {
-      error.textContent = "Connexion impossible. Vérifiez vos identifiants et que l’API Billed est lancée.";
+      error.textContent =
+        "Connexion impossible. Vérifiez vos identifiants et que l’API Billed est lancée.";
       error.hidden = false;
       return;
     } finally {
       this.pending = false;
-      this.buttons.forEach(button => { button.disabled = false; });
+      this.buttons.forEach((button) => {
+        button.disabled = false;
+      });
     }
 
     PREVIOUS_LOCATION = ROUTES_PATH[destination];
-    this.document.body.style.backgroundColor = "#fff";
+    this.document.body.style.backgroundColor = "#F6F5F1";
     this.onNavigate(PREVIOUS_LOCATION);
   }
 }
