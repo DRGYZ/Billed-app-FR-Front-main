@@ -31,7 +31,7 @@ export default () => {
                   </div>
                   <div class="col-half">
                     <label for="datepicker" class="bold-label">Date</label>
-                    <input required type="date" class="form-control blue-border" data-testid="datepicker" />
+                    <input required type="date" id="datepicker" class="form-control blue-border" data-testid="datepicker" />
                   </div>
                   <div class="col-half">
                     <label for="amount" class="bold-label">Montant TTC </label>
@@ -55,14 +55,15 @@ export default () => {
                   </div>
                   <div class="col-half">
                     <label for="file" class="bold-label">Justificatif</label>
-                    <input required type="file" class="form-control blue-border" data-testid="file" />
-                    <span data-testid="file-error" class="error"></span>
+                    <input required type="file" id="file" class="form-control blue-border" data-testid="file" accept=".jpg,.jpeg,.png" aria-describedby="file-error" />
+                    <span id="file-error" data-testid="file-error" class="error" role="alert"></span>
                   </div>
                 </div>
             </div>
             <div class="row">
               <div class="col-md-6">
                 <div class="col-half">
+                  <p data-testid="save-error" class="text-danger" role="alert"></p>
                   <button type="submit" id='btn-send-bill' class="btn btn-primary">Envoyer</button>
                 </div>
               </div>

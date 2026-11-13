@@ -22,11 +22,11 @@ class Api {
   }
 }
 
-const getHeaders = (headers) => {
+const getHeaders = ({noContentType, noAuthorization, ...headers}) => {
   const h = { }
-  if (!headers.noContentType) h['Content-Type'] = 'application/json'
+  if (!noContentType) h['Content-Type'] = 'application/json'
   const jwt = localStorage.getItem('jwt')
-  if (jwt && !headers.noAuthorization) h['Authorization'] = `Bearer ${jwt}`
+  if (jwt && !noAuthorization) h['Authorization'] = `Bearer ${jwt}`
   return {...h, ...headers}
 }
 

@@ -5,7 +5,7 @@
 import LoginUI from "../views/LoginUI";
 import Login from "../containers/Login.js";
 import { ROUTES } from "../constants/routes";
-import { fireEvent, screen } from "@testing-library/dom";
+import { fireEvent, screen, waitFor } from "@testing-library/dom";
 
 describe("Given that I am a user on login page", () => {
   describe("When I do not fill fields and I click on employee button Login In", () => {
@@ -49,7 +49,7 @@ describe("Given that I am a user on login page", () => {
   });
 
   describe("When I do fill fields in correct format and I click on employee button Login In", () => {
-    test("Then I should be identified as an Employee in app", () => {
+    test("Then I should be identified as an Employee in app", async () => {
       document.body.innerHTML = LoginUI();
       const inputData = {
         email: "johndoe@email.com",
@@ -68,52 +68,37 @@ describe("Given that I am a user on login page", () => {
 
       const form = screen.getByTestId("form-employee");
 
-      // localStorage should be populated with form data
-      Object.defineProperty(window, "localStorage", {
-        value: {
-          getItem: jest.fn(() => null),
-          setItem: jest.fn(() => null),
-        },
-        writable: true,
-      });
+      const localStorage = { setItem: jest.fn() };
 
       // we have to mock navigation to test it
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname });
       };
 
-      let PREVIOUS_LOCATION = "";
-
-      const store = jest.fn();
-
-      const login = new Login({
+      const store = { login: jest.fn().mockResolvedValue({ jwt: "employee-test-token" }) };
+      new Login({
         document,
-        localStorage: window.localStorage,
+        localStorage,
         onNavigate,
-        PREVIOUS_LOCATION,
         store,
       });
 
-      const handleSubmit = jest.fn(login.handleSubmitEmployee);
-      login.login = jest.fn().mockResolvedValue({});
-      form.addEventListener("submit", handleSubmit);
       fireEvent.submit(form);
-      expect(handleSubmit).toHaveBeenCalled();
-      expect(window.localStorage.setItem).toHaveBeenCalled();
-      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+      expect(localStorage.setItem).not.toHaveBeenCalled();
+      await screen.findByText("Mes notes de frais");
+      expect(store.login).toHaveBeenCalledTimes(1);
+      expect(store.login).toHaveBeenCalledWith(JSON.stringify(inputData));
+      expect(localStorage.setItem).toHaveBeenCalledWith("jwt", "employee-test-token");
+      expect(localStorage.setItem).toHaveBeenCalledWith(
         "user",
         JSON.stringify({
           type: "Employee",
           email: inputData.email,
-          password: inputData.password,
           status: "connected",
         })
       );
     });
 
-    test("It should renders Bills page", () => {
-      expect(screen.getAllByText("Mes notes de frais")).toBeTruthy();
-    });
   });
 });
 
@@ -159,7 +144,7 @@ describe("Given that I am a user on login page", () => {
   });
 
   describe("When I do fill fields in correct format and I click on admin button Login In", () => {
-    test("Then I should be identified as an HR admin in app", () => {
+    test("Then I should be identified as an HR admin in app", async () => {
       document.body.innerHTML = LoginUI();
       const inputData = {
         type: "Admin",
@@ -180,51 +165,60 @@ describe("Given that I am a user on login page", () => {
 
       const form = screen.getByTestId("form-admin");
 
-      // localStorage should be populated with form data
-      Object.defineProperty(window, "localStorage", {
-        value: {
-          getItem: jest.fn(() => null),
-          setItem: jest.fn(() => null),
-        },
-        writable: true,
-      });
+      const localStorage = { setItem: jest.fn() };
 
       // we have to mock navigation to test it
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname });
       };
 
-      let PREVIOUS_LOCATION = "";
-
-      const store = jest.fn();
-
-      const login = new Login({
+      const store = { login: jest.fn().mockResolvedValue({ jwt: "admin-test-token" }) };
+      new Login({
         document,
-        localStorage: window.localStorage,
+        localStorage,
         onNavigate,
-        PREVIOUS_LOCATION,
         store,
       });
 
-      const handleSubmit = jest.fn(login.handleSubmitAdmin);
-      login.login = jest.fn().mockResolvedValue({});
-      form.addEventListener("submit", handleSubmit);
       fireEvent.submit(form);
-      expect(handleSubmit).toHaveBeenCalled();
-      expect(window.localStorage.setItem).toHaveBeenCalled();
-      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+      await screen.findByText("Validations");
+      expect(store.login).toHaveBeenCalledWith(JSON.stringify({
+        email: inputData.email,
+        password: inputData.password,
+      }));
+      expect(localStorage.setItem).toHaveBeenCalledWith("jwt", "admin-test-token");
+      expect(localStorage.setItem).toHaveBeenCalledWith(
         "user",
         JSON.stringify({
           type: "Admin",
           email: inputData.email,
-          password: inputData.password,
           status: "connected",
         })
       );
     });
 
-    test("It should renders HR dashboard page", () => {
-      expect(screen.queryByText("Validations")).toBeTruthy();
-    });
   });
+});
+
+test("A rejected login shows an error, leaves storage empty, and can be retried", async () => {
+  document.body.innerHTML = LoginUI();
+  const localStorage = { setItem: jest.fn() };
+  const store = { login: jest.fn().mockRejectedValueOnce(new Error("Bad credentials"))
+    .mockResolvedValueOnce({ jwt: "test-token" }) };
+  const onNavigate = jest.fn();
+  new Login({ document, localStorage, onNavigate, store });
+
+  const form = screen.getByTestId("form-employee");
+  const submit = screen.getByTestId("employee-login-button");
+  fireEvent.submit(form);
+  fireEvent.submit(form);
+  expect(submit.disabled).toBe(true);
+  await screen.findByRole("alert");
+  expect(store.login).toHaveBeenCalledTimes(1);
+  expect(localStorage.setItem).not.toHaveBeenCalled();
+  expect(onNavigate).not.toHaveBeenCalled();
+  expect(submit.disabled).toBe(false);
+
+  fireEvent.submit(form);
+  await waitFor(() => expect(onNavigate).toHaveBeenCalledWith("#employee/bills"));
 });

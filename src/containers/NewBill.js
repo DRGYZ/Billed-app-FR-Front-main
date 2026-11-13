@@ -6,64 +6,77 @@ export default class NewBill {
     this.document = document;
     this.onNavigate = onNavigate;
     this.store = store;
+    this.localStorage = localStorage;
     const formNewBill = this.document.querySelector(
       `form[data-testid="form-new-bill"]`
     );
     formNewBill.addEventListener("submit", this.handleSubmit);
     const file = this.document.querySelector(`input[data-testid="file"]`);
     file.addEventListener("change", this.handleChangeFile);
+    this.fileInput = file;
+    this.submitButton = formNewBill.querySelector('button[type="submit"]');
+    this.fileError = formNewBill.querySelector('[data-testid="file-error"]');
+    this.saveError = formNewBill.querySelector('[data-testid="save-error"]');
     this.fileUrl = null;
     this.fileName = null;
     this.billId = null;
     new Logout({ document, localStorage, onNavigate });
   }
-  handleChangeFile = (e) => {
-    e.preventDefault();
+  handleChangeFile = async (e) => {
+    if (this.busy) return;
     const file = e.target.files?.[0];
+    this.fileUrl = null;
+    this.fileName = null;
+    this.billId = null;
+    this.fileError.textContent = "";
+    this.saveError.textContent = "";
     if (!file) return;
     const fileName = file.name;
     const isValid = /\.(jpe?g|png)$/i.test(fileName);
 
     if (!isValid) {
-      // reject non-image files (pdf, etc.)
       e.target.value = "";
-      this.fileUrl = null;
-      this.fileName = null;
-      const errorEl = this.document.querySelector('[data-testid="file-error"]');
-      if (errorEl) errorEl.textContent = "Formats acceptés : jpg, jpeg, png";
+      this.fileError.textContent = "Formats acceptés : jpg, jpeg, png";
       return;
     }
 
-    const errorEl = this.document.querySelector('[data-testid="file-error"]');
-    if (errorEl) errorEl.textContent = "";
-
     const formData = new FormData();
-    const email = JSON.parse(localStorage.getItem("user")).email;
+    const email = JSON.parse(this.localStorage.getItem("user")).email;
     formData.append("file", file);
     formData.append("email", email);
 
-    this.store
-      .bills()
-      .create({
+    this.setBusy(true);
+    try {
+      const { fileUrl, key } = await this.store.bills().create({
         data: formData,
         headers: { noContentType: true },
-      })
-      .then(({ fileUrl, key }) => {
-        console.log(fileUrl);
-        this.billId = key;
-        this.fileUrl = fileUrl;
-        this.fileName = fileName;
-      })
-      .catch((error) => console.error(error));
+      });
+      this.billId = key;
+      this.fileUrl = fileUrl;
+      this.fileName = fileName;
+    } catch {
+      this.fileInput.value = "";
+      this.fileError.textContent = "Envoi du justificatif impossible. Réessayez.";
+    } finally {
+      this.setBusy(false);
+    }
   };
 
-  handleSubmit = (e) => {
+  setBusy(busy) {
+    this.busy = busy;
+    this.fileInput.disabled = busy;
+    this.submitButton.disabled = busy;
+  }
+
+  handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(
-      'e.target.querySelector(`input[data-testid="datepicker"]`).value',
-      e.target.querySelector(`input[data-testid="datepicker"]`).value
-    );
-    const email = JSON.parse(localStorage.getItem("user")).email;
+    if (this.busy) return;
+    if (!this.billId) {
+      this.fileError.textContent = "Ajoutez un justificatif avant d’envoyer la note.";
+      this.fileInput.focus();
+      return;
+    }
+    const email = JSON.parse(this.localStorage.getItem("user")).email;
     const bill = {
       email,
       type: e.target.querySelector(`select[data-testid="expense-type"]`).value,
@@ -82,20 +95,19 @@ export default class NewBill {
       fileName: this.fileName,
       status: "pending",
     };
-    this.updateBill(bill);
-    this.onNavigate(ROUTES_PATH["Bills"]);
+    this.saveError.textContent = "";
+    this.setBusy(true);
+    try {
+      await this.updateBill(bill);
+    } catch {
+      this.saveError.textContent = "Envoi de la note impossible. Réessayez.";
+      return;
+    } finally {
+      this.setBusy(false);
+    }
+    if (e.target.isConnected) this.onNavigate(ROUTES_PATH["Bills"]);
   };
 
-  // not need to cover this function by tests
-  updateBill = (bill) => {
-    if (this.store) {
-      this.store
-        .bills()
-        .update({ data: JSON.stringify(bill), selector: this.billId })
-        .then(() => {
-          this.onNavigate(ROUTES_PATH["Bills"]);
-        })
-        .catch((error) => console.error(error));
-    }
-  };
+  updateBill = (bill) =>
+    this.store.bills().update({ data: JSON.stringify(bill), selector: this.billId });
 }

@@ -10,6 +10,20 @@ import DashboardUI from "../views/DashboardUI.js"
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js"
 
 export default () => {
+  const savedUser = localStorage.getItem("user")
+  if (savedUser) {
+    try {
+      const user = JSON.parse(savedUser)
+      if (user && Object.hasOwn(user, "password")) {
+        delete user.password
+        localStorage.setItem("user", JSON.stringify(user))
+      }
+    } catch {
+      localStorage.removeItem("user")
+      localStorage.removeItem("jwt")
+    }
+  }
+
   const rootDiv = document.getElementById('root')
   rootDiv.innerHTML = ROUTES({ pathname: window.location.pathname })
 
@@ -23,7 +37,7 @@ export default () => {
     if (pathname === ROUTES_PATH['Login']) {
       rootDiv.innerHTML = ROUTES({ pathname })
       document.body.style.backgroundColor="#0E5AE5"
-      new Login({ document, localStorage, onNavigate, PREVIOUS_LOCATION, store })
+      new Login({ document, localStorage, onNavigate, store })
     } else if (pathname === ROUTES_PATH['Bills']) {
       rootDiv.innerHTML = ROUTES({ pathname, loading: true })
       const divIcon1 = document.getElementById('layout-icon1')
@@ -72,7 +86,7 @@ export default () => {
   }
 
   if (window.location.pathname === "/" && window.location.hash === "") {
-    new Login({ document, localStorage, onNavigate, PREVIOUS_LOCATION, store })
+    new Login({ document, localStorage, onNavigate, store })
     document.body.style.backgroundColor="#0E5AE5"
   } else if (window.location.hash !== "") {
     if (window.location.hash === ROUTES_PATH['Bills']) {

@@ -18,10 +18,11 @@ export default () => {
               <div class="card-body">
                 <form class="form-signin" data-testid="form-employee">
                   <h2 class="h3 mb-3 font-weight-normal">Employé</h2>
-                  <label for="inputEmail">Votre email</label>
-                  <input type="email" data-testid="employee-email-input" class="form-control" placeholder="johndoe@email.com" required autofocus>
-                  <label for="inputPassword">Mot de passe</label>
-                  <input type="password" data-testid="employee-password-input" class="form-control" placeholder="******" required>
+                  <label for="employee-email">Votre email</label>
+                  <input type="email" id="employee-email" data-testid="employee-email-input" class="form-control" placeholder="johndoe@email.com" autocomplete="username" required autofocus>
+                  <label for="employee-password">Mot de passe</label>
+                  <input type="password" id="employee-password" data-testid="employee-password-input" class="form-control" placeholder="******" autocomplete="current-password" required>
+                  <p class="text-danger mt-2" role="alert" hidden></p>
                   <button class="btn btn-lg btn-primary btn-block" data-testid="employee-login-button" style="background-color: #0E5AE5;" type="submit">Se connecter</button>
                 </form>
               </div>
@@ -32,10 +33,11 @@ export default () => {
               <div class="card-body">
                 <form class="form-signin" data-testid="form-admin">
                   <h2 class="h3 mb-3 font-weight-normal">Administration</h2>
-                  <label for="inputEmail">Votre email</label>
-                  <input type="email" data-testid="admin-email-input" class="form-control" placeholder="johndoe@email.com" required autofocus>
-                  <label for="inputPassword">Mot de passe</label>
-                  <input type="password" data-testid="admin-password-input" class="form-control" placeholder="******" required>
+                  <label for="admin-email">Votre email</label>
+                  <input type="email" id="admin-email" data-testid="admin-email-input" class="form-control" placeholder="johndoe@email.com" autocomplete="username" required>
+                  <label for="admin-password">Mot de passe</label>
+                  <input type="password" id="admin-password" data-testid="admin-password-input" class="form-control" placeholder="******" autocomplete="current-password" required>
+                  <p class="text-danger mt-2" role="alert" hidden></p>
                   <button  type="submit" class="btn btn-lg btn-primary btn-block" data-testid="admin-login-button" style="background-color: #0E5AE5;">Se connecter</button>
                 </form>
               </div>
