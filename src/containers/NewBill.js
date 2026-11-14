@@ -26,20 +26,25 @@ export default class NewBill {
     this.fileName = null;
     this.billId = null;
 
-    const navigateBack = () => this.onNavigate(ROUTES_PATH["Bills"]);
+    const clearPreview = () => this.updatePreview(false);
+    const navigateBack = () => {
+      clearPreview();
+      this.onNavigate(ROUTES_PATH["Bills"]);
+    };
     this.document.getElementById("btn-cancel-bill")?.addEventListener("click", navigateBack);
     this.document.getElementById("layout-icon1")?.addEventListener("click", navigateBack);
+    this.document.getElementById("layout-disconnect")?.addEventListener("click", clearPreview);
 
     new Logout({ document, localStorage, onNavigate });
   }
 
   updatePreview(show, fileName = "", imageUrl = "") {
-    if (this.objectPreviewUrl && typeof URL !== "undefined" && typeof URL.revokeObjectURL === "function") {
-      URL.revokeObjectURL(this.objectPreviewUrl);
-      this.objectPreviewUrl = null;
-    }
     if (!this.previewCard) return;
     if (!show) {
+      if (this.objectPreviewUrl) {
+        URL.revokeObjectURL(this.objectPreviewUrl);
+        this.objectPreviewUrl = null;
+      }
       this.previewCard.hidden = true;
       if (this.previewImg) this.previewImg.src = "";
       if (this.previewName) this.previewName.textContent = "";
@@ -85,12 +90,11 @@ export default class NewBill {
       this.fileUrl = fileUrl;
       this.fileName = fileName;
 
-      let localPreview = fileUrl;
-      if (typeof URL !== "undefined" && typeof URL.createObjectURL === "function") {
+      if (!this.fileInput.isConnected) return;
+      if (typeof URL.createObjectURL === "function") {
         this.objectPreviewUrl = URL.createObjectURL(file);
-        localPreview = this.objectPreviewUrl;
       }
-      this.updatePreview(true, fileName, localPreview);
+      this.updatePreview(true, fileName, this.objectPreviewUrl || fileUrl);
     } catch {
       this.fileInput.value = "";
       this.updatePreview(false);
@@ -142,6 +146,7 @@ export default class NewBill {
     } finally {
       this.setBusy(false);
     }
+    this.updatePreview(false);
     if (e.target.isConnected) this.onNavigate(ROUTES_PATH["Bills"]);
   };
 
