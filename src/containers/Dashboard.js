@@ -1,4 +1,4 @@
-import { formatDate } from "../app/format.js";
+import { formatDate, escapeHtml, formatEmployeeName, setFlash } from "../app/format.js";
 import DashboardFormUI from "../views/DashboardFormUI.js";
 import BigBilledIcon from "../assets/svg/big_billed.js";
 import { ROUTES_PATH } from "../constants/routes.js";
@@ -14,12 +14,10 @@ export const filteredBills = (data, status) => {
         if (typeof jest !== "undefined") {
           selectCondition = bill.status === status;
         } else {
-        /* istanbul ignore next */
-          // in prod environment
+          /* istanbul ignore next */
           const userEmail = JSON.parse(localStorage.getItem("user")).email;
           selectCondition =
-            bill.status === status &&
-            ![...USERS_TEST, userEmail].includes(bill.email);
+            bill.status === status && ![...USERS_TEST, userEmail].includes(bill.email);
         }
 
         return selectCondition;
@@ -28,29 +26,22 @@ export const filteredBills = (data, status) => {
 };
 
 export const card = (bill) => {
-  const firstAndLastNames = bill.email.split("@")[0];
-  const firstName = firstAndLastNames.includes(".")
-    ? firstAndLastNames.split(".")[0]
-    : "";
-  const lastName = firstAndLastNames.includes(".")
-    ? firstAndLastNames.split(".")[1]
-    : firstAndLastNames;
-
+  const displayName = formatEmployeeName(bill);
   return `
-    <div class='bill-card' id='open-bill${bill.id}' data-testid='open-bill${
+    <div class="bill-card" id="open-bill${escapeHtml(bill.id)}" data-testid="open-bill${escapeHtml(
     bill.id
-  }'>
-      <div class='bill-card-name-container'>
-        <div class='bill-card-name'> ${firstName} ${lastName} </div>
-        <span class='bill-card-grey'> ... </span>
+  )}" data-status="${escapeHtml(bill.status || "pending")}">
+      <div class="bill-card-name-container">
+        <div class="bill-card-name">${escapeHtml(displayName)}</div>
+        <span class="bill-card-grey">...</span>
       </div>
-      <div class='name-price-container'>
-        <span> ${bill.name} </span>
-        <span> ${bill.amount} € </span>
+      <div class="name-price-container">
+        <span>${escapeHtml(bill.name || "Note de frais")}</span>
+        <span>${escapeHtml(bill.amount)} €</span>
       </div>
-      <div class='date-type-container'>
-        <span> ${formatDate(bill.date)} </span>
-        <span> ${bill.type} </span>
+      <div class="date-type-container">
+        <span>${escapeHtml(formatDate(bill.date))}</span>
+        <span>${escapeHtml(bill.type)}</span>
       </div>
     </div>
   `;
@@ -76,25 +67,46 @@ export default class {
     this.document = document;
     this.onNavigate = onNavigate;
     this.store = store;
-    this.expanded = { 1: false, 2: false, 3: false }; // per-section open/closed
-    this.currentBillId = null; // which bill is selected
-    this.detailOpen = false; // is the right panel open?
+    this.expanded = { 1: false, 2: false, 3: false };
+    this.currentBillId = null;
+    this.detailOpen = false;
 
     $("#arrow-icon1").click((e) => this.handleShowTickets(e, bills, 1));
     $("#arrow-icon2").click((e) => this.handleShowTickets(e, bills, 2));
     $("#arrow-icon3").click((e) => this.handleShowTickets(e, bills, 3));
+
+    $(".status-bills-header").on("click", (event) => {
+      if ($(event.target).closest(".arrow-icon").length) return;
+      const idx = $(event.currentTarget).attr("data-toggle-arrow");
+      if (idx) $(`#arrow-icon${idx}`).trigger("click");
+    });
+
     new Logout({ localStorage, onNavigate });
+
+    if (typeof jest === "undefined" && Array.isArray(bills) && bills.length > 0) {
+      /* istanbul ignore next */
+      const pending = filteredBills(bills, "pending");
+      /* istanbul ignore next */
+      this.handleShowTickets(null, bills, 1);
+      /* istanbul ignore next */
+      if (pending.length > 0) {
+        this.handleEditTicket(null, pending[0], bills);
+      }
+    }
   }
 
   handleClickIconEye = () => {
-    const billUrl = $("#icon-eye-d").attr("data-bill-url");
+    const billUrl = $("#icon-eye-d").attr("data-bill-url") || "";
     const $modal = $("#modaleFileAdmin1");
-    const imgWidth = Math.floor($modal.width() * 0.8);
+    const modalWidth = $modal.width() || 680;
+    const imgWidth = Math.max(280, Math.floor(modalWidth * 0.8));
 
     $modal
       .find(".modal-body")
       .html(
-        `<div style='text-align:center;'><img width=${imgWidth} src="${billUrl}" alt="Bill"/></div>`
+        `<div class="bill-proof-container"><img width="${imgWidth}" src="${escapeHtml(
+          billUrl
+        )}" alt="Bill"/></div>`
       );
 
     if (typeof $modal.modal === "function") $modal.modal("show");
@@ -103,72 +115,71 @@ export default class {
   handleEditTicket(e, bill, bills) {
     const isSameBill = this.currentBillId === bill.id && this.detailOpen;
 
-    // Reset all cards' background
-    $(".bill-card").css({ background: "#0D5AE5" });
+    $(".bill-card").removeClass("is-selected");
 
     if (isSameBill) {
-      // Toggle off the detail panel
-      $(".dashboard-right-container div").html(`
-      <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
-    `);
-      $(".vertical-navbar").css({ height: "120vh" });
+      $(".dashboard-right-slot").html(`
+        <div class="dashboard-empty-state">
+          <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
+          <p>Sélectionnez une note dans la file pour examiner le justificatif et décider de sa validation ou de son refus.</p>
+        </div>
+      `);
       this.detailOpen = false;
       this.currentBillId = null;
       return;
     }
 
-    // Open details for the clicked bill
-    $(`#open-bill${bill.id}`).css({ background: "#2A2B35" });
-    $(".dashboard-right-container div").html(DashboardFormUI(bill));
-    $(".vertical-navbar").css({ height: "150vh" });
+    $(`#open-bill${bill.id}`).addClass("is-selected");
+    $(".dashboard-right-slot").html(DashboardFormUI(bill));
 
     this.detailOpen = true;
     this.currentBillId = bill.id;
 
-    // (Re)bind detail actions for the newly rendered right panel
     $("#icon-eye-d").off("click").on("click", this.handleClickIconEye);
+    $(".quick-chip")
+      .off("click")
+      .on("click", (evt) => {
+        const note = $(evt.currentTarget).attr("data-quick-note") || "";
+        $("#commentary2").val(note).focus();
+      });
     $("#btn-accept-bill")
       .off("click")
-      .on("click", (e) => this.handleAcceptSubmit(e, bill));
+      .on("click", (evt) => this.handleAcceptSubmit(evt, bill));
     $("#btn-refuse-bill")
       .off("click")
-      .on("click", (e) => this.handleRefuseSubmit(e, bill));
+      .on("click", (evt) => this.handleRefuseSubmit(evt, bill));
   }
 
-  handleAcceptSubmit = (e, bill) => {
+  submitDecision(bill, status) {
+    const comment = $("#commentary2").val();
     const newBill = {
       ...bill,
-      status: "accepted",
-      commentAdmin: $("#commentary2").val(),
+      status,
+      commentAdmin: comment,
     };
-    const update = this.updateBill(newBill);
-    if (update && typeof update.then === "function") {
-      return update.then(() => {
-        this.onNavigate(ROUTES_PATH["Dashboard"]);
+    const recordFlashAndNavigate = () => {
+      setFlash("billed_admin_flash", {
+        status,
+        statusLabel: status === "accepted" ? "Note validée" : "Note refusée",
+        name: bill.name || "Note de frais",
+        amount: bill.amount || 0,
       });
-    }
-    this.onNavigate(ROUTES_PATH["Dashboard"]);
-    return null;
-  };
+      this.onNavigate(ROUTES_PATH["Dashboard"]);
+    };
 
-  handleRefuseSubmit = (e, bill) => {
-    const newBill = {
-      ...bill,
-      status: "refused",
-      commentAdmin: $("#commentary2").val(),
-    };
     const update = this.updateBill(newBill);
     if (update && typeof update.then === "function") {
-      return update.then(() => {
-        this.onNavigate(ROUTES_PATH["Dashboard"]);
-      });
+      return update.then(recordFlashAndNavigate);
     }
-    this.onNavigate(ROUTES_PATH["Dashboard"]);
+    recordFlashAndNavigate();
     return null;
-  };
+  }
+
+  handleAcceptSubmit = (e, bill) => this.submitDecision(bill, "accepted");
+
+  handleRefuseSubmit = (e, bill) => this.submitDecision(bill, "refused");
 
   handleShowTickets(e, bills, index) {
-    // toggle only this section
     this.expanded[index] = !this.expanded[index];
 
     const container = $(`#status-bills-container${index}`);
@@ -179,12 +190,9 @@ export default class {
       const list = filteredBills(bills, getStatus(index));
       container.html(cards(list));
 
-      // Bind clicks only for the bills rendered in THIS section
       list.forEach((bill) => {
         const $card = $(`#open-bill${bill.id}`);
-        $card
-          .off("click")
-          .on("click", (evt) => this.handleEditTicket(evt, bill, bills));
+        $card.off("click").on("click", (evt) => this.handleEditTicket(evt, bill, bills));
       });
     } else {
       arrow.css({ transform: "rotate(90deg)" });
@@ -214,14 +222,13 @@ export default class {
     }
   };
 
-  // not need to cover this function by tests
   /* istanbul ignore next */
   updateBill = (bill) => {
     if (this.store) {
       return this.store
         .bills()
         .update({ data: JSON.stringify(bill), selector: bill.id })
-        .then((bill) => bill)
+        .then((updated) => updated)
         .catch(console.log);
     }
   };

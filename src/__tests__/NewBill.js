@@ -118,6 +118,7 @@ describe("Given I am connected as an employee", () => {
       // simulate file already uploaded
       newBill.fileUrl = "test.png"
       newBill.fileName = "test.png"
+      newBill.billId = "1234"
 
       fireEvent.submit(form)
 
@@ -128,10 +129,9 @@ describe("Given I am connected as an employee", () => {
   })
 
   describe("When an API error occurs on NewBill", () => {
-    test("Then it should log a 404 error when file upload fails", async () => {
+    test("Then it should show a message when upload returns 404", async () => {
       window.onNavigate(ROUTES_PATH.NewBill)
 
-      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
       const store = {
         bills: jest.fn(() => ({
           create: jest.fn(() => Promise.reject(new Error("Erreur 404"))),
@@ -150,14 +150,13 @@ describe("Given I am connected as an employee", () => {
 
       fireEvent.change(fileInput, { target: { files: [goodFile] } })
 
-      await waitFor(() => expect(errorSpy).toHaveBeenCalled())
-      expect(errorSpy).toHaveBeenCalledWith(new Error("Erreur 404"))
+      await screen.findByText("Envoi du justificatif impossible. Réessayez.")
+      expect(fileInput.disabled).toBe(false)
     })
 
-    test("Then it should log a 500 error when file upload fails", async () => {
+    test("Then it should show a message when upload returns 500", async () => {
       window.onNavigate(ROUTES_PATH.NewBill)
 
-      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
       const store = {
         bills: jest.fn(() => ({
           create: jest.fn(() => Promise.reject(new Error("Erreur 500"))),
@@ -176,14 +175,13 @@ describe("Given I am connected as an employee", () => {
 
       fireEvent.change(fileInput, { target: { files: [goodFile] } })
 
-      await waitFor(() => expect(errorSpy).toHaveBeenCalled())
-      expect(errorSpy).toHaveBeenCalledWith(new Error("Erreur 500"))
+      await screen.findByText("Envoi du justificatif impossible. Réessayez.")
+      expect(fileInput.disabled).toBe(false)
     })
 
-    test("Then it should log a 404 error when bill update fails", async () => {
+    test("Then it should keep the form open when save returns 404", async () => {
       window.onNavigate(ROUTES_PATH.NewBill)
 
-      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
       const store = {
         bills: jest.fn(() => ({
           update: jest.fn(() => Promise.reject(new Error("Erreur 404"))),
@@ -198,28 +196,15 @@ describe("Given I am connected as an employee", () => {
       })
 
       newBill.billId = "1234"
-      newBill.updateBill({
-        email: "employee@test.tld",
-        type: "Transports",
-        name: "Taxi",
-        amount: 45,
-        date: "2022-01-01",
-        vat: "20",
-        pct: 20,
-        commentary: "",
-        fileUrl: "test.png",
-        fileName: "test.png",
-        status: "pending",
-      })
+      fireEvent.submit(screen.getByTestId("form-new-bill"))
 
-      await waitFor(() => expect(errorSpy).toHaveBeenCalled())
-      expect(errorSpy).toHaveBeenCalledWith(new Error("Erreur 404"))
+      await screen.findByText("Envoi de la note impossible. Réessayez.")
+      expect(screen.getByTestId("form-new-bill")).toBeTruthy()
     })
 
-    test("Then it should log a 500 error when bill update fails", async () => {
+    test("Then it should keep the form open when save returns 500", async () => {
       window.onNavigate(ROUTES_PATH.NewBill)
 
-      const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {})
       const store = {
         bills: jest.fn(() => ({
           update: jest.fn(() => Promise.reject(new Error("Erreur 500"))),
@@ -234,22 +219,10 @@ describe("Given I am connected as an employee", () => {
       })
 
       newBill.billId = "1234"
-      newBill.updateBill({
-        email: "employee@test.tld",
-        type: "Transports",
-        name: "Taxi",
-        amount: 45,
-        date: "2022-01-01",
-        vat: "20",
-        pct: 20,
-        commentary: "",
-        fileUrl: "test.png",
-        fileName: "test.png",
-        status: "pending",
-      })
+      fireEvent.submit(screen.getByTestId("form-new-bill"))
 
-      await waitFor(() => expect(errorSpy).toHaveBeenCalled())
-      expect(errorSpy).toHaveBeenCalledWith(new Error("Erreur 500"))
+      await screen.findByText("Envoi de la note impossible. Réessayez.")
+      expect(screen.getByTestId("form-new-bill")).toBeTruthy()
     })
   })
 })

@@ -10,6 +10,20 @@ import DashboardUI from "../views/DashboardUI.js"
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js"
 
 export default () => {
+  const savedUser = localStorage.getItem("user")
+  if (savedUser) {
+    try {
+      const user = JSON.parse(savedUser)
+      if (user && Object.hasOwn(user, "password")) {
+        delete user.password
+        localStorage.setItem("user", JSON.stringify(user))
+      }
+    } catch {
+      localStorage.removeItem("user")
+      localStorage.removeItem("jwt")
+    }
+  }
+
   const rootDiv = document.getElementById('root')
   rootDiv.innerHTML = ROUTES({ pathname: window.location.pathname })
 
@@ -22,21 +36,21 @@ export default () => {
     )
     if (pathname === ROUTES_PATH['Login']) {
       rootDiv.innerHTML = ROUTES({ pathname })
-      document.body.style.backgroundColor="#0E5AE5"
-      new Login({ document, localStorage, onNavigate, PREVIOUS_LOCATION, store })
+      document.body.style.backgroundColor="#F6F5F1"
+      new Login({ document, localStorage, onNavigate, store })
     } else if (pathname === ROUTES_PATH['Bills']) {
       rootDiv.innerHTML = ROUTES({ pathname, loading: true })
       const divIcon1 = document.getElementById('layout-icon1')
       const divIcon2 = document.getElementById('layout-icon2')
-      divIcon1.classList.add('active-icon')
-      divIcon2.classList.remove('active-icon')
+      divIcon1?.classList.add('active-icon')
+      divIcon2?.classList.remove('active-icon')
       const bills = new Bills({ document, onNavigate, store, localStorage  })
       bills.getBills().then(data => {
         rootDiv.innerHTML = BillsUI({ data })
         const divIcon1 = document.getElementById('layout-icon1')
         const divIcon2 = document.getElementById('layout-icon2')
-        divIcon1.classList.add('active-icon')
-        divIcon2.classList.remove('active-icon')
+        divIcon1?.classList.add('active-icon')
+        divIcon2?.classList.remove('active-icon')
         new Bills({ document, onNavigate, store, localStorage })
       }).catch(error => {
         rootDiv.innerHTML = ROUTES({ pathname, error })
@@ -46,8 +60,8 @@ export default () => {
       new NewBill({ document, onNavigate, store, localStorage })
       const divIcon1 = document.getElementById('layout-icon1')
       const divIcon2 = document.getElementById('layout-icon2')
-      divIcon1.classList.remove('active-icon')
-      divIcon2.classList.add('active-icon')
+      divIcon1?.classList.remove('active-icon')
+      divIcon2?.classList.add('active-icon')
     } else if (pathname === ROUTES_PATH['Dashboard']) {
       rootDiv.innerHTML = ROUTES({ pathname, loading: true })
       const bills = new Dashboard({ document, onNavigate, store, bills: [], localStorage })
@@ -63,7 +77,7 @@ export default () => {
   window.onpopstate = (e) => {
     const user = JSON.parse(localStorage.getItem('user'))
     if (window.location.pathname === "/" && !user) {
-      document.body.style.backgroundColor="#0E5AE5"
+      document.body.style.backgroundColor="#F6F5F1"
       rootDiv.innerHTML = ROUTES({ pathname: window.location.pathname })
     }
     else if (user) {
@@ -72,22 +86,22 @@ export default () => {
   }
 
   if (window.location.pathname === "/" && window.location.hash === "") {
-    new Login({ document, localStorage, onNavigate, PREVIOUS_LOCATION, store })
-    document.body.style.backgroundColor="#0E5AE5"
+    new Login({ document, localStorage, onNavigate, store })
+    document.body.style.backgroundColor="#F6F5F1"
   } else if (window.location.hash !== "") {
     if (window.location.hash === ROUTES_PATH['Bills']) {
       rootDiv.innerHTML = ROUTES({ pathname: window.location.hash, loading: true })
       const divIcon1 = document.getElementById('layout-icon1')
       const divIcon2 = document.getElementById('layout-icon2')
-      divIcon1.classList.add('active-icon')
-      divIcon2.classList.remove('active-icon')
+      divIcon1?.classList.add('active-icon')
+      divIcon2?.classList.remove('active-icon')
       const bills = new Bills({ document, onNavigate, store, localStorage  })
       bills.getBills().then(data => {
         rootDiv.innerHTML = BillsUI({ data })
         const divIcon1 = document.getElementById('layout-icon1')
         const divIcon2 = document.getElementById('layout-icon2')
-        divIcon1.classList.add('active-icon')
-        divIcon2.classList.remove('active-icon')
+        divIcon1?.classList.add('active-icon')
+        divIcon2?.classList.remove('active-icon')
         new Bills({ document, onNavigate, store, localStorage })
       }).catch(error => {
         rootDiv.innerHTML = ROUTES({ pathname: window.location.hash, error })
@@ -97,8 +111,8 @@ export default () => {
       new NewBill({ document, onNavigate, store, localStorage })
       const divIcon1 = document.getElementById('layout-icon1')
       const divIcon2 = document.getElementById('layout-icon2')
-      divIcon1.classList.remove('active-icon')
-      divIcon2.classList.add('active-icon')
+      divIcon1?.classList.remove('active-icon')
+      divIcon2?.classList.add('active-icon')
     } else if (window.location.hash === ROUTES_PATH['Dashboard']) {
       rootDiv.innerHTML = ROUTES({ pathname: window.location.hash, loading: true })
       const bills = new Dashboard({ document, onNavigate, store, bills: [], localStorage })

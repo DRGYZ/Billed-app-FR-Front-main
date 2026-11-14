@@ -1,4 +1,5 @@
 import { ROUTES_PATH } from "../constants/routes.js";
+import { escapeHtml } from "../app/format.js";
 import Logout from "./Logout.js";
 
 export default class {
@@ -6,16 +7,30 @@ export default class {
     this.document = document;
     this.onNavigate = onNavigate;
     this.store = store;
-    const buttonNewBill = document.querySelector(
-      `button[data-testid="btn-new-bill"]`
-    );
-    if (buttonNewBill)
+
+    const buttonNewBill = document.querySelector(`button[data-testid="btn-new-bill"]`);
+    if (buttonNewBill) {
       buttonNewBill.addEventListener("click", this.handleClickNewBill);
+    }
+
+    const navNewBill = document.getElementById("layout-icon2");
+    if (navNewBill) {
+      navNewBill.addEventListener("click", this.handleClickNewBill);
+    }
+
     const iconEye = document.querySelectorAll(`div[data-testid="icon-eye"]`);
-    if (iconEye)
+    if (iconEye) {
       iconEye.forEach((icon) => {
         icon.addEventListener("click", () => this.handleClickIconEye(icon));
+        icon.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            this.handleClickIconEye(icon);
+          }
+        });
       });
+    }
+
     new Logout({ document, localStorage, onNavigate });
   }
 
@@ -24,12 +39,13 @@ export default class {
   };
 
   handleClickIconEye = (icon) => {
-    const billUrl = icon.getAttribute("data-bill-url");
-    const imgWidth = Math.floor($("#modaleFile").width() * 0.5);
+    const billUrl = icon.getAttribute("data-bill-url") || "";
+    const modalWidth = $("#modaleFile").width() || 560;
+    const imgWidth = Math.max(240, Math.floor(modalWidth * 0.5));
     $("#modaleFile")
       .find(".modal-body")
       .html(
-        `<div style='text-align: center;' class="bill-proof-container"><img width=${imgWidth} src=${billUrl} alt="Bill" /></div>`
+        `<div class="bill-proof-container"><img width="${imgWidth}" src="${escapeHtml(billUrl)}" alt="Bill" /></div>`
       );
     $("#modaleFile").modal("show");
   };
@@ -42,7 +58,7 @@ export default class {
         .then((snapshot) => {
           const parseTs = (d) => {
             const t = Date.parse(d);
-            return Number.isNaN(t) ? 0 : t; // avoid NaN breaking the sort
+            return Number.isNaN(t) ? 0 : t;
           };
 
           const bills = snapshot
@@ -50,7 +66,7 @@ export default class {
               try {
                 return {
                   ...doc,
-                  date: doc.date, // keep raw date for sorting
+                  date: doc.date,
                   status: doc.status,
                 };
               } catch (e) {
@@ -59,7 +75,6 @@ export default class {
                 return doc;
               }
             })
-            // sort latest → earliest (anti-chronological)
             .sort((a, b) => parseTs(b.date) - parseTs(a.date));
 
           return bills;

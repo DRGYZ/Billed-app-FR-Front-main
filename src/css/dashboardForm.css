@@ -1,84 +1,278 @@
-
-.dashboard-form label{
-  margin-top: 20px;
+.dashboard-form {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
 }
 
-.input-field {
-  background: #f9f9f9;
-  border-radius: 5px;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 16px;
-  line-height: 15px;
+.inspector-header {
   display: flex;
-  align-items: center;
-  color: #0D5AE5;
-  padding: 20px;
-  border-radius: 5px;
-}
-
-.input-flex{
-  display:flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
 }
 
-.textarea-field{
-  background: #f9f9f9;
-  border-radius: 5px;
-  font-style: normal;
-  font-weight: normal;
-  font-size: 16px;
-  line-height: 15px;
-  color: #0D5AE5;
-  padding: 20px;
-  border-radius: 5px;
-  overflow-y: auto;
+.inspector-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
 }
 
-#vat-flex-container {
+.inspector-who {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.inspector-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.inspector-left {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
 }
 
-.vat-flex {
-  width: 45%;
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
-.file-flex {
-  min-width: 325px;
-  max-width: 450px;
-  background: #0D5AE5;
-  opacity: 0.5;
-  border: 2px solid #0D5AE5;
-  box-sizing: border-box;
-  border-radius: 5px;
-  color: #fff;
+.data-cell {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  min-width: 0;
 }
 
-.icons-container span {
-  margin: 8px;
+.data-cell-label {
+  display: block;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.data-cell-value {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quick-chip {
+  border: 1px solid var(--border-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quick-chip:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dashboard-form .form-control {
+  min-height: 82px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.dashboard-form .form-control:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
 }
 
 .buttons-flex {
   display: flex;
-  justify-content: space-between;
-  margin-top: 24px;
-  max-width: 300px !important;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+  max-width: none !important;
+  width: 100% !important;
 }
 
-.buttons-flex button{
-  width: 100px !important;
-  background-color: #0D5AE5;
+.buttons-flex button {
+  flex: 1 1 110px;
+  min-width: 0;
+  width: auto !important;
+  min-height: 42px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 13.5px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#btn-refuse-bill {
+  background-color: var(--surface);
+  border: 1px solid #FCA5A5;
+  color: var(--bad-fg);
+}
+
+#btn-refuse-bill:hover {
+  background-color: var(--bad-bg);
+  border-color: #F87171;
+}
+
+#btn-accept-bill {
+  background-color: var(--ok-solid);
+  border: 1px solid transparent;
+  color: #FFFFFF;
+}
+
+#btn-accept-bill:hover {
+  background-color: #065F46;
+}
+
+/* Inline Receipt Desk (Warm Stone Paper) */
+.receipt-desk {
+  background: var(--surface-alt);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.receipt-desk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.receipt-filename {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 #icon-eye-d {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
 }
 
-#icon-download-d {
-  cursor: pointer;
+#icon-eye-d:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-#file-name-admin {
-  max-width: 300px;
+#icon-eye-d svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+#icon-eye-d svg path {
+  fill: currentColor !important;
+}
+
+.receipt-frame {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #FFFFFF;
+  border: 1px solid var(--border-strong);
+}
+
+.receipt-photo {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: center 22%;
+}
+
+.receipt-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.receipt-check-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.check-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ok-solid);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1100px) {
+  .inspector-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .data-grid {
+    grid-template-columns: 1fr;
+  }
 }

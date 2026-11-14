@@ -1,5 +1,9 @@
 #loading {
-  position: absolute;
-  top: 40%; left: 50%;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
 }
